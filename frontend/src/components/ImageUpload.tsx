@@ -24,12 +24,13 @@ export default function Home() {
     const formData: FormData = new FormData();
     formData.append('image', file);
 
+    // Preview the image immediately after upload
+    setPreview(URL.createObjectURL(file));
+
     setLoading(true);
     setError(null);
 
     try {
-      console.log('Starting API request to:', API_URL);
-
       const config = {
         method: 'post',
         url: API_URL,
@@ -42,10 +43,7 @@ export default function Home() {
         timeout: 30000,
       };
 
-      console.log('Request config:', config);
-
       const response: AxiosResponse<ApiResponse> = await axios(config);
-      console.log('Response received:', response.data);
 
       if (response.data.success) {
         setCaption(response.data.caption || '');
@@ -54,18 +52,12 @@ export default function Home() {
       }
     } catch (error) {
       const axiosError = error as AxiosError<ApiResponse>;
-      console.error('Full error object:', axiosError);
 
       if (axiosError.response) {
-        console.error('Error response data:', axiosError.response.data);
-        console.error('Error response status:', axiosError.response.status);
-        console.error('Error response headers:', axiosError.response.headers);
         setError(`Server error: ${axiosError.response.data?.error || axiosError.response.statusText}`);
       } else if (axiosError.request) {
-        console.error('Error request:', axiosError.request);
         setError('No response received from server. Please check if the server is running.');
       } else {
-        console.error('Error message:', axiosError.message);
         setError(`Error: ${axiosError.message}`);
       }
       setCaption('');
@@ -75,45 +67,56 @@ export default function Home() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-4xl font-bold text-center mb-8">
-        Toyota Hackathon
+    <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <h1 className="text-4xl font-extrabold text-center text-indigo-600 mb-8">
+        Toyota Hackathon - Eagle
       </h1>
 
       {/* Image Upload Section */}
-      <div className="mb-8">
-        <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg">
+      <div className="mb-8 flex flex-col items-center">
+        <div className="flex flex-col items-center justify-center p-16 border-4 border-dashed border-indigo-500 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+          <label 
+            htmlFor="file-upload"
+            className="mb-4 px-6 py-3 bg-indigo-600 text-white rounded-full cursor-pointer hover:bg-indigo-700 transition-colors"
+          >
+            Choose File
+          </label>
           <input
             type="file"
+            id="file-upload"
             accept="image/*"
             onChange={handleImageUpload}
-            className="mb-4"
+            className="hidden"
           />
           {error && (
-            <div className="text-red-500 mb-4 p-4 bg-red-50 rounded">
-              <p className="font-bold">Error:</p>
+            <div className="text-red-500 mb-4 p-4 bg-red-50 border-l-4 border-red-500 rounded-lg shadow-md">
+              <p className="font-semibold">Error:</p>
               <p>{error}</p>
             </div>
           )}
           {preview && (
-            <img
-              src={preview}
-              alt="Preview"
-              className="max-w-md h-auto rounded-lg shadow-lg"
-            />
+            <div className="flex justify-between items-start space-x-8 mt-4">
+              <div>
+                <img
+                  src={preview}
+                  alt="Preview"
+                  className="max-w-md h-auto rounded-lg shadow-2xl"
+                />
+              </div>
+              <div className="flex-grow">
+                {loading ? (
+                  <div className="text-center text-indigo-600 font-semibold">Processing image...</div>
+                ) : caption ? (
+                  <div className="p-6 bg-gradient-to-r from-indigo-100 via-purple-100 to-indigo-50 rounded-lg shadow-lg">
+                    <h2 className="text-2xl font-semibold text-indigo-600 mb-4">Description:</h2>
+                    <p className="text-lg text-gray-800">{caption}</p>
+                  </div>
+                ) : null}
+              </div>
+            </div>
           )}
         </div>
       </div>
-
-      {/* Result Section */}
-      {loading ? (
-        <div className="text-center">Processing image...</div>
-      ) : caption ? (
-        <div className="mt-8 p-4 bg-gray-100 rounded-lg">
-          <h2 className="text-2xl font-semibold mb-4">Generated Caption:</h2>
-          <p className="text-lg">{caption}</p>
-        </div>
-      ) : null}
     </div>
   );
 }
