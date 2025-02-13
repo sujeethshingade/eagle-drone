@@ -1,21 +1,27 @@
 "use client";
 
-import { useState } from 'react';
-import axios from 'axios';
+import { useState, ChangeEvent } from 'react';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 
-const API_URL = 'http://localhost:5000/api/process-image';
+const API_URL: string = 'http://localhost:5000/api/process-image';
+
+interface ApiResponse {
+  success: boolean;
+  caption?: string;
+  error?: string;
+}
 
 export default function Home() {
-  const [caption, setCaption] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [preview, setPreview] = useState(null);
-  const [error, setError] = useState(null);
+  const [caption, setCaption] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
+  const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file: File | undefined = e.target.files?.[0];
     if (!file) return;
 
-    const formData = new FormData();
+    const formData: FormData = new FormData();
     formData.append('image', file);
 
     setLoading(true);
@@ -38,28 +44,29 @@ export default function Home() {
 
       console.log('Request config:', config);
 
-      const response = await axios(config);
+      const response: AxiosResponse<ApiResponse> = await axios(config);
       console.log('Response received:', response.data);
 
       if (response.data.success) {
-        setCaption(response.data.caption);
+        setCaption(response.data.caption || '');
       } else {
         throw new Error(response.data.error || 'Failed to process image');
       }
     } catch (error) {
-      console.error('Full error object:', error);
+      const axiosError = error as AxiosError<ApiResponse>;
+      console.error('Full error object:', axiosError);
 
-      if (error.response) {
-        console.error('Error response data:', error.response.data);
-        console.error('Error response status:', error.response.status);
-        console.error('Error response headers:', error.response.headers);
-        setError(`Server error: ${error.response.data?.error || error.response.statusText}`);
-      } else if (error.request) {
-        console.error('Error request:', error.request);
+      if (axiosError.response) {
+        console.error('Error response data:', axiosError.response.data);
+        console.error('Error response status:', axiosError.response.status);
+        console.error('Error response headers:', axiosError.response.headers);
+        setError(`Server error: ${axiosError.response.data?.error || axiosError.response.statusText}`);
+      } else if (axiosError.request) {
+        console.error('Error request:', axiosError.request);
         setError('No response received from server. Please check if the server is running.');
       } else {
-        console.error('Error message:', error.message);
-        setError(`Error: ${error.message}`);
+        console.error('Error message:', axiosError.message);
+        setError(`Error: ${axiosError.message}`);
       }
       setCaption('');
     } finally {
@@ -70,7 +77,7 @@ export default function Home() {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-4xl font-bold text-center mb-8">
-        Image to Text Converter
+        Toyota Hackathon
       </h1>
 
       {/* Image Upload Section */}

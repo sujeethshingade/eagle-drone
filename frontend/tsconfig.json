@@ -34,7 +34,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "src/api/upload.js",
-    "src/components/ImageUpload.js"
+    "src/components/ImageUpload.tsx"
   ],
   "exclude": [
     "node_modules"
