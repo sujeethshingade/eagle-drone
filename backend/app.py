@@ -20,7 +20,7 @@ if not HUGGINGFACE_API_KEY:
     raise ValueError("HUGGINGFACE_API_KEY not found in environment variables!")
 
 # Using the smaller BLIP model
-API_URL = "https://api-inference.huggingface.co/models/Salesforce/blip-image-captioning-base"
+API_URL = "https://api-inference.huggingface.co/models/Salesforce/blip-image-captioning-large"
 headers = {
     "Authorization": f"Bearer {HUGGINGFACE_API_KEY}"
 }
