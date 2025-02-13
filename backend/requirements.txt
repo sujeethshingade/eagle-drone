@@ -1,6 +1,4 @@
 flask
 flask-cors
-pillow
-torch
-transformers
 requests
+python-dotenv
